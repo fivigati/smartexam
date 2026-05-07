@@ -109,33 +109,45 @@
     }
 
     // PERBAIKAN URUTAN LOADING AGAR TIDAK NYANGKUT
-    window.onload = async () => {
-        // 1. Hilangkan splash screen dulu setelah 2 detik agar tidak nyangkut
+    // --- INITIAL LOAD (KEMBALI KE METODE STABIL) ---
+    window.onload = function() {
+        // 1. Langsung panggil fungsi load data
+        loadKelasDinamis();
+        loadSiswaDinamis();
+        
+        // 2. Splash screen hilang otomatis setelah 2.5 detik
         setTimeout(() => {
             const splash = document.getElementById('splash');
             splash.style.opacity = '0';
             setTimeout(() => splash.style.display = 'none', 500);
-        }, 2000);
-
-        // 2. Load data secara paralel di belakang layar
-        try {
-            const [kelas, siswa] = await Promise.all([
-                callAPI('getKelasList'),
-                callAPI('getAllNamaSiswa')
-            ]);
-
-            if (kelas) {
-                document.getElementById("kelas").innerHTML = '<option value="">Pilih Kelas</option>' + 
-                    kelas.map(k => `<option value="${k}">${k}</option>`).join('');
-            }
-            if (siswa) {
-                document.getElementById("listNama").innerHTML = siswa.map(s => `<option value="${s}">`).join('');
-            }
-        } catch (e) {
-            console.error("Gagal memuat data awal:", e);
-        }
+        }, 2500);
     };
 
+    async function loadKelasDinamis() {
+        const list = await callAPI('getKelasList');
+        const select = document.getElementById("kelas");
+        if(list && list.length > 0) {
+            select.innerHTML = '<option value="">Pilih Kelas</option>';
+            list.forEach(k => {
+                let o = document.createElement("option");
+                o.value = k; o.text = k; select.appendChild(o);
+            });
+        } else {
+            select.innerHTML = '<option value="">Gagal memuat kelas</option>';
+        }
+    }
+
+    async function loadSiswaDinamis() {
+        const dataSiswa = await callAPI('getAllNamaSiswa');
+        const datalist = document.getElementById("listNama");
+        if(dataSiswa && datalist) {
+            datalist.innerHTML = ""; 
+            dataSiswa.forEach(nama => {
+                let option = document.createElement("option");
+                option.value = nama; datalist.appendChild(option);
+            });
+        }
+    }
    async function cekToken() {
       const btn = document.getElementById("btnCek");
       btn.innerText = "MENGECEK..."; btn.disabled = true;
