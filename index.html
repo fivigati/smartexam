@@ -1,242 +1,196 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Exam - Zenith Math</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        /* CSS GABUNGAN */
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: #F8FAFC; text-align: center; overflow-x: hidden; }
-        .header { height: 140px; background: linear-gradient(135deg, #FFD54F, #8B5CF6); border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; }
-        .card { background: white; width: 380px; max-width: 92%; margin: -60px auto 20px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); box-sizing: border-box; }
-        input, select { width: 90%; padding: 14px; border-radius: 30px; border: 2px solid #8B5CF6; margin: 10px 0; font-size: 16px; text-align: center; outline: none; }
-        button { background: linear-gradient(135deg, #6C63FF, #8B5CF6); color: white; padding: 12px 40px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; transition: .2s; width: 100%; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        
-        /* EXAM INTERFACE */
-        #ujianPage { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #f0f2f5; z-index: 999; display: flex; flex-direction: column; }
-        .exam-header { background: white; padding: 10px 0; border-bottom: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; }
-        .exam-logo-img { height: 35px; width: auto; margin-bottom: 5px; }
-        .topbar-controls { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; box-sizing: border-box; }
-        .timer { font-size: 16px; color: #DC2626; font-weight: bold; background: #fee2e2; padding: 5px 15px; border-radius: 20px; }
-        .iframe-container { flex: 1; margin: 10px; background: white; border-radius: 8px; border: 1px solid #d1d5db; overflow: hidden; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; }
-        
-        /* MODALS */
-        .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 10000; }
-        .popupCard { background: white; width: 320px; max-width: 85%; margin: 25vh auto; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-        #lockScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .error-text { color: #ff4757; font-size: 13px; margin-top: 5px; font-weight: 600; display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <title>Smart Exam 28 - Zenith Math</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* CSS GABUNGAN & REFINED UI */
+    body { font-family: 'Poppins', sans-serif; margin: 0; background: #F8FAFC; text-align: center; overflow: hidden; user-select: none; }
+    .header { height: 140px; background: linear-gradient(135deg, #FFD54F, #8B5CF6); border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; }
+    .card { background: white; width: 380px; max-width: 92%; margin: -60px auto 20px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); box-sizing: border-box; transition: .3s; }
+    input, select { width: 90%; padding: 14px; border-radius: 30px; border: 2px solid #8B5CF6; margin: 10px 0; font-size: 16px; text-align: center; outline: none; }
+    button { background: linear-gradient(135deg, #6C63FF, #8B5CF6); color: white; padding: 12px 40px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; transition: .2s; }
+    button:active { transform: scale(0.98); }
+
+    /* UJIAN TOOLBAR & PAGE */
+    #ujianPage { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #f0f2f5; z-index: 999; display: flex; flex-direction: column; }
+    .exam-header { background: white; padding: 10px 0; border-bottom: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; }
+    .topbar-controls { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; box-sizing: border-box; }
+    .toolbar { display: flex; gap: 6px; }
+    .toolbar button { width: 40px; height: 36px; font-size: 16px; padding: 0; border-radius: 8px; background: #f1f5f9; color: black; border: 1px solid #d1d5db; margin: 0; }
+    .exitBtn { background: #DC2626 !important; color: white !important; border: none !important; }
+    .timer { font-size: 16px; color: #DC2626; font-weight: bold; background: #fee2e2; padding: 5px 15px; border-radius: 20px; }
+    .iframe-container { flex: 1; margin: 8px; background: white; border-radius: 8px; border: 1px solid #d1d5db; overflow: hidden; position: relative; }
+    iframe { width: 100%; height: 100%; border: none; transition: transform 0.2s; transform-origin: 0 0; }
+
+    /* MODALS & LOCKSCREEN */
+    .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 10000; }
+    .popupCard { background: white; width: 320px; max-width: 85%; margin: 25vh auto; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    #lockScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.98); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; color: white; }
+    #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #8B5CF6; z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
+  </style>
 </head>
 <body>
 
-    <div id="splash" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#8B5CF6; z-index:30000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: 0.5s;">
-        <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:100px; margin-bottom:20px;">
-        <h2 style="color:white;">Smart Exam</h2>
-    </div>
+  <div id="splash">
+    <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:120px; margin-bottom:20px;">
+    <h2 style="color:white;">Smart Exam</h2>
+    <div style="width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #FFD54F; border-radius:50%; animation: spin 1s linear infinite;"></div>
+  </div>
 
-    <div class="header"></div>
+  <div class="header"></div>
 
-    <div id="landing" class="card">
-        <img id="appLogo" src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:60px; margin-bottom:10px;">
-        <h2 id="appName" style="margin: 5px 0;">Smart Exam</h2>
-        <p id="schoolName" style="font-size:14px; color:#666;">SMPN 28 Malang</p>
-        <input id="namaSiswa" list="listNama" placeholder="Nama Lengkap" autocomplete="off">
-        <datalist id="listNama"></datalist>
-        <input id="token" placeholder="TOKEN UJIAN" autocomplete="off">
-        <select id="kelas"><option value="">Memuat kelas...</option></select>
-        <button id="btnCek" onclick="cekToken()">CEK UJIAN</button>
-    </div>
+  <!-- LANDING -->
+  <div id="landing" class="card">
+    <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:65px; margin-bottom:15px;">
+    <h2>Smart Exam</h2>
+    <p style="font-size:14px; color:#666; margin-top:-10px;">SMPN 28 Malang</p>
+    <input id="namaSiswa" list="listNama" placeholder="Nama Lengkap" autocomplete="off">
+    <datalist id="listNama"></datalist>
+    <input id="token" placeholder="Masukkan TOKEN" oninput="this.value=this.value.toUpperCase()">
+    <select id="kelas"><option value="">Memuat kelas...</option></select>
+    <button id="btnCek" onclick="cekToken()">CEK UJIAN</button>
+  </div>
 
-    <div id="examInfo" class="card" style="display:none">
-        <h3>Informasi Ujian</h3>
-        <p id="mapel"></p>
-        <p id="jadwal"></p>
-        <p id="durasi"></p>
-        <button onclick="mulaiUjian()">MULAI UJIAN</button>
-    </div>
+  <!-- INFO -->
+  <div id="examInfo" class="card" style="display:none">
+    <h3>Informasi Ujian</h3>
+    <p id="mapel"></p>
+    <p id="jadwal"></p>
+    <p id="durasi"></p>
+    <button onclick="mulaiUjian()">MULAI UJIAN</button>
+  </div>
 
-    <div id="ujianPage" style="display:none">
-        <div class="exam-header">
-            <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" class="exam-logo-img">
-            <div class="topbar-controls">
-                <div class="timer" id="timer">00:00</div>
-                <button onclick="exitUjian()" style="width:auto; padding:5px 15px; background:red; margin:0;">KELUAR</button>
-            </div>
+  <!-- UJIAN PAGE -->
+  <div id="ujianPage" style="display:none">
+    <div class="exam-header">
+      <div style="font-size: 11px; font-weight: 600; color: #64748b;">SMART EXAM 28</div>
+      <div class="topbar-controls">
+        <div class="toolbar">
+          <button onclick="refreshForm()">🔄</button>
+          <button onclick="zoomIn()">+</button>
+          <button onclick="zoomOut()">−</button>
+          <button onclick="exitUjian()" class="exitBtn">⏻</button>
         </div>
-        <div class="iframe-container">
-            <iframe id="formFrame"></iframe>
-        </div>
+        <div class="timer" id="timer">00:00</div>
+      </div>
     </div>
-
-    <div id="lockScreen">
-        <h2>Layar Terkunci</h2>
-        <p>Anda terdeteksi keluar dari mode ujian.</p>
-        <button onclick="paksaFullscreen()" style="width:auto; background:#FFD54F; color:black;">KEMBALI KE UJIAN</button>
+    <div class="iframe-container">
+      <iframe id="formFrame"></iframe>
     </div>
+  </div>
 
-    <div id="popupExit" class="popup">
-        <div class="popupCard">
-            <h3>Konfirmasi Keluar</h3>
-            <input type="text" id="exitInput" placeholder="Token Keluar">
-            <div id="errorExit" class="error-text">Token Salah!</div>
-            <button onclick="konfirmasiExit()">KELUAR SEKARANG</button>
-            <button onclick="batalExit()" style="background:#eee; color:#333;">BATAL</button>
-        </div>
-    </div>
+  <!-- LOCK SCREEN -->
+  <div id="lockScreen">
+    <h2 style="color:#FFD54F;">⚠️ PERINGATAN</h2>
+    <p id="lockMsg">Anda keluar dari mode ujian!</p>
+    <button onclick="kembaliKeUjian()" style="background:#FFD54F; color:black; width:auto; padding:15px 40px; border-radius:30px; font-weight:bold;">LANJUTKAN UJIAN</button>
+  </div>
 
-    <script>
-        // --- KONFIGURASI API ---
-        const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyC-O4sRF355UTWdddYZTISl4A0f_nZpxT1K4CMYpHDJ4HwKyPrIkiVkDbc6hhFxhOlYA/exec"; 
+  <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
 
-        const APP = {
-            ujianAktif: false,
-            linkForm: "",
-            exitToken: "",
-            durasiUjian: 0,
-            waktuMulai: 0,
-            namaSiswa: "",
-            mapelUjian: "",
-            kelasSiswa: "",
-            ruangSiswa: "",
-            warningCount: 0,
-            heartbeatInterval: null
-        };
+  <script>
+    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyC-O4sRF355UTWdddYZTISl4A0f_nZpxT1K4CMYpHDJ4HwKyPrIkiVkDbc6hhFxhOlYA/exec"; 
+    const APP = { ujianAktif: false, warningCount: 0, maxWarning: 3, zoom: 1, exitLimit: 10, alarm: document.getElementById("alarmAudio") };
 
-        // --- API CALLER ---
-        async function callAPI(action, data = {}) {
-            const response = await fetch(BACKEND_URL, {
-                method: "POST",
-                body: JSON.stringify({ action, data })
-            });
-            return response.json();
-        }
+    async function callAPI(action, data = {}) {
+      const res = await fetch(BACKEND_URL, { method: "POST", body: JSON.stringify({ action, data }) });
+      return res.json();
+    }
 
-        // --- INITIAL LOAD ---
-        window.onload = async () => {
-            setTimeout(() => document.getElementById('splash').style.display = 'none', 2000);
-            
-            // Load Kelas & Siswa secara paralel
-            try {
-                const kelas = await callAPI('getKelasList');
-                const siswa = await callAPI('getAllNamaSiswa');
-                
-                const sel = document.getElementById("kelas");
-                sel.innerHTML = '<option value="">Pilih Kelas</option>';
-                kelas.forEach(k => sel.innerHTML += `<option value="${k}">${k}</option>`);
+    window.onload = async () => {
+      const kelas = await callAPI('getKelasList');
+      const siswa = await callAPI('getAllNamaSiswa');
+      document.getElementById("kelas").innerHTML = '<option value="">Pilih Kelas</option>' + kelas.map(k => `<option value="${k}">${k}</option>`).join('');
+      document.getElementById("listNama").innerHTML = siswa.map(s => `<option value="${s}">`).join('');
+      setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(() => document.getElementById('splash').style.display = 'none', 500); }, 2000);
+    };
 
-                const dl = document.getElementById("listNama");
-                siswa.forEach(s => dl.innerHTML += `<option value="${s}">`);
-            } catch(e) { console.error("Gagal load data awal"); }
-        };
+    async function cekToken() {
+      const btn = document.getElementById("btnCek");
+      btn.innerText = "MENGECEK..."; btn.disabled = true;
+      const res = await callAPI('getExamByToken', { token: document.getElementById("token").value, kelas: document.getElementById("kelas").value });
+      if(res.status) {
+        Object.assign(APP, res);
+        APP.namaSiswa = document.getElementById("namaSiswa").value;
+        const mhs = await callAPI('cariDataSiswa', { nama: APP.namaSiswa });
+        APP.kelasSiswa = mhs.found ? mhs.kelas : document.getElementById("kelas").value;
+        APP.ruangSiswa = mhs.found ? mhs.ruang : "Luar";
+        document.getElementById("landing").style.display = "none";
+        document.getElementById("examInfo").style.display = "block";
+        document.getElementById("mapel").innerText = "Mapel: " + res.mapel;
+        document.getElementById("jadwal").innerText = `Waktu: ${res.mulai} - ${res.selesai}`;
+        document.getElementById("durasi").innerText = `Durasi: ${res.durasi} Menit (${APP.ruangSiswa})`;
+      } else { alert(res.message); }
+      btn.innerText = "CEK UJIAN"; btn.disabled = false;
+    }
 
-        // --- CORE LOGIC ---
-        async function cekToken() {
-            const btn = document.getElementById("btnCek");
-            const nama = document.getElementById("namaSiswa").value;
-            const token = document.getElementById("token").value;
-            const kelas = document.getElementById("kelas").value;
+    function mulaiUjian() {
+      APP.ujianAktif = true; APP.waktuMulai = Date.now();
+      document.getElementById("examInfo").style.display = "none";
+      document.getElementById("ujianPage").style.display = "flex";
+      document.getElementById("formFrame").src = APP.linkForm + "?embedded=true";
+      paksaFullscreen(); startTimer(); heartbeat("ON");
+    }
 
-            if(!nama || !token || !kelas) return alert("Lengkapi data!");
+    function startTimer() {
+      setInterval(() => {
+        const sisa = (APP.durasiUjian * 60000) - (Date.now() - APP.waktuMulai);
+        if(sisa <= 0) location.reload();
+        const m = Math.floor(sisa / 60000), s = Math.floor((sisa % 60000) / 1000);
+        document.getElementById("timer").innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      }, 1000);
+    }
 
-            btn.disabled = true;
-            btn.innerText = "Mengecek...";
+    function tanganiPelanggaran(jenis) {
+      if(!APP.ujianAktif) return;
+      APP.warningCount++; APP.alarm.play();
+      document.getElementById("lockScreen").style.display = "flex";
+      document.getElementById("lockMsg").innerText = `${jenis} (Peringatan ke-${APP.warningCount})`;
+      callAPI('simpanLog', { nama: APP.namaSiswa, kelas: APP.kelasSiswa, ruang: APP.ruangSiswa, mapel: APP.mapelUjian, jenis: `${jenis} (${APP.warningCount})` });
+      if(APP.warningCount >= APP.maxWarning) { alert("Batas pelanggaran tercapai!"); location.reload(); }
+    }
 
-            const res = await callAPI('getExamByToken', { token, kelas });
-            if(res.status) {
-                const mhs = await callAPI('cariDataSiswa', { nama });
-                APP.namaSiswa = nama;
-                APP.mapelUjian = res.mapel;
-                APP.linkForm = res.link;
-                APP.exitToken = res.exit;
-                APP.durasiUjian = res.durasi;
-                APP.kelasSiswa = mhs.found ? mhs.kelas : kelas;
-                APP.ruangSiswa = mhs.found ? mhs.ruang : "Luar";
+    function paksaFullscreen() {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen();
+      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      document.getElementById("lockScreen").style.display = "none";
+    }
 
-                document.getElementById("landing").style.display = "none";
-                document.getElementById("examInfo").style.display = "block";
-                document.getElementById("mapel").innerText = "Mapel: " + res.mapel;
-                document.getElementById("jadwal").innerText = "Waktu: " + res.mulai + " - " + res.selesai;
-                document.getElementById("durasi").innerText = "Durasi: " + res.durasi + " Menit";
-            } else {
-                alert(res.message);
-            }
-            btn.disabled = false;
-            btn.innerText = "CEK UJIAN";
-        }
+    function kembaliKeUjian() { APP.alarm.pause(); APP.alarm.currentTime = 0; paksaFullscreen(); }
 
-        function mulaiUjian() {
-            APP.ujianAktif = true;
-            document.getElementById("examInfo").style.display = "none";
-            document.getElementById("ujianPage").style.display = "flex";
-            document.getElementById("formFrame").src = APP.linkForm + "?embedded=true";
-            APP.waktuMulai = Date.now();
-            
-            mulaiHeartbeat();
-            startTimer();
-            paksaFullscreen();
-        }
+    function heartbeat(st) { callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: st }); }
 
-        // --- SECURITY ---
-        function paksaFullscreen() {
-            const doc = document.documentElement;
-            if (doc.requestFullscreen) doc.requestFullscreen();
-            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-            
-            document.getElementById("lockScreen").style.display = "none";
-        }
+    setInterval(() => {
+      if(APP.ujianAktif && !document.hidden) {
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        if(!isIOS && !document.fullscreenElement) tanganiPelanggaran("Keluar Fullscreen");
+        heartbeat("ON");
+      }
+    }, 15000);
 
-        document.addEventListener("visibilitychange", () => {
-            if(document.hidden && APP.ujianAktif) {
-                document.getElementById("lockScreen").style.display = "flex";
-                callAPI('simpanLog', { 
-                    nama: APP.namaSiswa, kelas: APP.kelasSiswa, ruang: APP.ruangSiswa, 
-                    mapel: APP.mapelUjian, jenis: "Pindah Tab" 
-                });
-                callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: "AWAY" });
-            } else if (!document.hidden && APP.ujianAktif) {
-                callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: "ON" });
-            }
-        });
+    document.addEventListener("visibilitychange", () => {
+      if(document.hidden && APP.ujianAktif) { tanganiPelanggaran("Pindah Tab"); heartbeat("AWAY"); }
+    });
 
-        // --- HEARTBEAT ---
-        function mulaiHeartbeat() {
-            callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: "ON" });
-            APP.heartbeatInterval = setInterval(() => {
-                if(APP.ujianAktif) {
-                    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-                    const st = (document.hidden || (!isIOS && !document.fullscreenElement)) ? "AWAY" : "ON";
-                    callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: st });
-                }
-            }, 15000);
-        }
+    function exitUjian() {
+      const sisaMenit = (APP.durasiUjian * 60000 - (Date.now() - APP.waktuMulai)) / 60000;
+      if(sisaMenit > APP.exitLimit) return alert(`Belum bisa keluar! Tunggu ${Math.ceil(sisaMenit - APP.exitLimit)} menit lagi.`);
+      const token = prompt("Masukkan Token Keluar:");
+      if(token === APP.exit) { heartbeat("OUT"); location.reload(); } else alert("Token Salah!");
+    }
 
-        // --- TIMER ---
-        function startTimer() {
-            setInterval(() => {
-                const sisa = (APP.durasiUjian * 60000) - (Date.now() - APP.waktuMulai);
-                if(sisa <= 0) location.reload();
-                const m = Math.floor(sisa / 60000);
-                const s = Math.floor((sisa % 60000) / 1000);
-                document.getElementById("timer").innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-
-        // --- EXIT ---
-        function exitUjian() {
-            document.getElementById("popupExit").style.display = "block";
-        }
-        function konfirmasiExit() {
-            if(document.getElementById("exitInput").value === APP.exitToken) {
-                callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: "OUT" });
-                location.reload();
-            } else {
-                document.getElementById("errorExit").style.display = "block";
-            }
-        }
-        function batalExit() { document.getElementById("popupExit").style.display = "none"; }
-    </script>
+    function refreshForm() { document.getElementById("formFrame").src = APP.linkForm + "?embedded=true"; }
+    function zoomIn() { if(APP.zoom < 1.5) { APP.zoom += 0.1; applyZoom(); } }
+    function zoomOut() { if(APP.zoom > 0.7) { APP.zoom -= 0.1; applyZoom(); } }
+    function applyZoom() { 
+      const f = document.getElementById("formFrame");
+      f.style.width = (100/APP.zoom)+"%"; f.style.height = (100/APP.zoom)+"%";
+      f.style.transform = `scale(${APP.zoom})`; 
+    }
+  </script>
 </body>
 </html>
