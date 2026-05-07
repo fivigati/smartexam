@@ -92,23 +92,52 @@
   <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
 
   <script>
+    <script>
     const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyC-O4sRF355UTWdddYZTISl4A0f_nZpxT1K4CMYpHDJ4HwKyPrIkiVkDbc6hhFxhOlYA/exec"; 
-    const APP = { ujianAktif: false, warningCount: 0, maxWarning: 3, zoom: 1, exitLimit: 10, alarm: document.getElementById("alarmAudio") };
-
-    async function callAPI(action, data = {}) {
-      const res = await fetch(BACKEND_URL, { method: "POST", body: JSON.stringify({ action, data }) });
-      return res.json();
-    }
-
-    window.onload = async () => {
-      const kelas = await callAPI('getKelasList');
-      const siswa = await callAPI('getAllNamaSiswa');
-      document.getElementById("kelas").innerHTML = '<option value="">Pilih Kelas</option>' + kelas.map(k => `<option value="${k}">${k}</option>`).join('');
-      document.getElementById("listNama").innerHTML = siswa.map(s => `<option value="${s}">`).join('');
-      setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(() => document.getElementById('splash').style.display = 'none', 500); }, 2000);
+    const APP = { 
+        ujianAktif: false, warningCount: 0, maxWarning: 3, zoom: 1, 
+        exitLimit: 10, alarm: document.getElementById("alarmAudio") 
     };
 
-    async function cekToken() {
+    async function callAPI(action, data = {}) {
+        try {
+            const res = await fetch(BACKEND_URL, { method: "POST", body: JSON.stringify({ action, data }) });
+            return await res.json();
+        } catch (e) {
+            console.error("API Error:", e);
+            return null;
+        }
+    }
+
+    // PERBAIKAN URUTAN LOADING AGAR TIDAK NYANGKUT
+    window.onload = async () => {
+        // 1. Hilangkan splash screen dulu setelah 2 detik agar tidak nyangkut
+        setTimeout(() => {
+            const splash = document.getElementById('splash');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 500);
+        }, 2000);
+
+        // 2. Load data secara paralel di belakang layar
+        try {
+            const [kelas, siswa] = await Promise.all([
+                callAPI('getKelasList'),
+                callAPI('getAllNamaSiswa')
+            ]);
+
+            if (kelas) {
+                document.getElementById("kelas").innerHTML = '<option value="">Pilih Kelas</option>' + 
+                    kelas.map(k => `<option value="${k}">${k}</option>`).join('');
+            }
+            if (siswa) {
+                document.getElementById("listNama").innerHTML = siswa.map(s => `<option value="${s}">`).join('');
+            }
+        } catch (e) {
+            console.error("Gagal memuat data awal:", e);
+        }
+    };
+
+   async function cekToken() {
       const btn = document.getElementById("btnCek");
       btn.innerText = "MENGECEK..."; btn.disabled = true;
       const res = await callAPI('getExamByToken', { token: document.getElementById("token").value, kelas: document.getElementById("kelas").value });
