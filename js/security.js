@@ -97,7 +97,7 @@ fetch(scriptURL, {
 
         nisn: sessionData.nisn,
 
-        exam_id: sessionData.exam_id,
+        subject: sessionData.subject,
 
         type: type,
 
@@ -348,7 +348,7 @@ currentZoom = 100;
 correctToken = "";
 examLink = "";
 
-sessionData.exam_id = "";
+sessionData.subject = "";
 sessionData.exit_token = "";
 
 // Hide modal exit
