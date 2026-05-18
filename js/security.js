@@ -86,9 +86,10 @@ document.getElementById(
 
 // Kirim violation
 fetch(scriptURL, {
-
     method: 'POST',
-
+    headers: {
+        'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
 
         action: 'logViolation',
