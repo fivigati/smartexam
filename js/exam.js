@@ -353,3 +353,54 @@ function tampilkanModalWaktuHabis() {
 
     }, 1000);
 }
+// =====================================================
+// CREATE SESSION
+// =====================================================
+
+async function createSession() {
+
+    try {
+
+        const res = await fetch(scriptURL, {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+
+                action: 'createSession',
+
+                npsn: sessionData.npsn,
+
+                nisn: sessionData.nisn,
+
+                subject: sessionData.subject,
+
+                browser_info:
+                    navigator.userAgent,
+
+                device_info:
+                    `${navigator.platform} | ${navigator.vendor}`,
+
+                ip_address:
+                    sessionData.userIP
+            })
+        });
+
+        return await res.json();
+
+    } catch (err) {
+
+        console.log(
+            'Create Session Error:',
+            err
+        );
+
+        return {
+            success: false
+        };
+    }
+}
