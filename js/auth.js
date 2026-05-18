@@ -39,6 +39,7 @@ sessionData.exit_token =
     // Config sekolah
 sessionData.minExitMinutes =
     r.config.min_exit_minutes || 10;
+sessionData.config = r.config;
 
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('studentSection').classList.remove('hidden');
