@@ -40,7 +40,7 @@ function konfirmasiKeluar() {
             action: 'recordHeartbeat',
             npsn: sessionData.npsn,
             nisn: sessionData.nisn,
-            exam_id: sessionData.exam_id,
+            subject: sessionData.subject,
             session_status: 'DONE',
             fullscreen_status: 'FULL',
             browser_info: navigator.userAgent,
