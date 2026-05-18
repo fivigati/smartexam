@@ -5,14 +5,28 @@
 function kirimHeartbeat(payload) {
 
     fetch(scriptURL, {
+
     method: 'POST',
+
     headers: {
         'Content-Type': 'application/json'
     },
+
     body: JSON.stringify(payload)
+
 })
 
-    .then(res => res.json())
+.then(async res => {
+
+    if (!res.ok) {
+
+        throw new Error(
+            'Server Error'
+        );
+    }
+
+    return await res.json();
+})
 
     .then(res => {
 
@@ -229,5 +243,5 @@ function startHeartbeat() {
 
         });
 
-    }, 30000);
+    }, 15000);
 }
