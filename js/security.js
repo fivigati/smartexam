@@ -82,7 +82,7 @@ lastViolationTime = now;
 // Alarm
 document.getElementById(
     'alarmAudio'
-).play();
+).play().catch(() => {});
 
 // Kirim violation
 fetch(scriptURL, {
@@ -110,7 +110,17 @@ fetch(scriptURL, {
     })
 
 })
-.then(res => res.json())
+.then(async res => {
+
+    if (!res.ok) {
+
+        throw new Error(
+            'Server Error'
+        );
+    }
+
+    return await res.json();
+})
 
 .then(res => {
 
@@ -265,6 +275,7 @@ if (sessionData.heartbeatInterval) {
     clearInterval(
         sessionData.heartbeatInterval
     );
+    sessionData.heartbeatInterval = null;
 }
 
 // Stop timer
