@@ -7,7 +7,16 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memverifikasi...';
         
         try {
-            const res = await fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'verifyStudent', nisn: id }) });
+            const res = await fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'verifyStudent',
+                    nisn: id
+                })
+            });
             const r = await res.json();
             if(r.success) {
                 // Auto-save ID
