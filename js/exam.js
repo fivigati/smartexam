@@ -32,7 +32,7 @@ function startExam() {
                     document.getElementById(
                         'studentSection'
                     ).dataset.duration
-                );
+                ) || 90;
 
             // tampilkan wrapper ujian
             document.getElementById(
@@ -397,6 +397,13 @@ async function createSession() {
                     sessionData.userIP
             })
         });
+
+        if (!res.ok) {
+
+            throw new Error(
+                'Server Error'
+            );
+        }
 
         return await res.json();
 
