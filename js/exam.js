@@ -64,12 +64,19 @@ function startExam() {
             // =====================================================
             const sessionResult =
                 await createSession();
-            if (!sessionResult.success) {
+            if (
+                !sessionResult ||
+                !sessionResult.success
+            ) {
+                
                 showNotif(
                     'Gagal membuat session',
                     'error'
+                
                 );
+                
                 resetExamSession();
+                
                 return;
             }
 
@@ -162,9 +169,10 @@ function startTimer(seconds) {
             // =====================================================
 
             if (
+                sessionData.minExitMinutes === 0 ||
                 remainingMinutes <=
                 sessionData.minExitMinutes
-            ) {
+            ){
 
                 closeBtn.disabled = false;
 
