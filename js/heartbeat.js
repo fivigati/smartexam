@@ -5,12 +5,12 @@
 function kirimHeartbeat(payload) {
 
     fetch(scriptURL, {
-
-        method: 'POST',
-
-        body: JSON.stringify(payload)
-
-    })
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+})
 
     .then(res => res.json())
 
