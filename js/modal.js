@@ -35,20 +35,37 @@ function konfirmasiKeluar() {
     if (inputUser === tokenSistem && tokenSistem !== "") {
     // kirim status DONE
     fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'recordHeartbeat',
-            npsn: sessionData.npsn,
-            nisn: sessionData.nisn,
-            subject: sessionData.subject,
-            session_status: 'DONE',
-            fullscreen_status: 'FULL',
-            browser_info: navigator.userAgent,
-            device_info: `${navigator.platform} | ${navigator.vendor}`,
-            ip_address: sessionData.userIP
-        }),
-        mode: 'no-cors'
-    });
+
+    method: 'POST',
+
+    headers: {
+        'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+
+        action: 'recordHeartbeat',
+
+        npsn: sessionData.npsn,
+
+        nisn: sessionData.nisn,
+
+        subject: sessionData.subject,
+
+        session_status: 'DONE',
+
+        fullscreen_status: 'FULLSCREEN',
+
+        browser_info:
+            navigator.userAgent,
+
+        device_info:
+            `${navigator.platform} | ${navigator.vendor}`,
+
+        ip_address:
+            sessionData.userIP
+    })
+});
 
     // beri jeda agar request terkirim
     setTimeout(() => {
