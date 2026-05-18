@@ -23,7 +23,10 @@ function kirimHeartbeat(payload) {
         // MULTI DEVICE DETECTED
         // =====================================================
 
-        if (!res.success) {
+        if (
+            !res.success &&
+            res.message
+        ) {
 
             showSecurityModal({
 
@@ -102,7 +105,7 @@ function startHeartbeat() {
 
         session_status: 'ONLINE',
 
-        fullscreen_status: 'FULL',
+        fullscreen_status: 'FULLSCREEN',
 
         browser_info:
             navigator.userAgent,
@@ -122,7 +125,14 @@ function startHeartbeat() {
 
     sessionData.heartbeatInterval = setInterval(() => {
 
-        if (!isExamActive) return;
+        if (!isExamActive) {
+            
+            clearInterval(
+                sessionData
+                .heartbeatInterval
+            );
+            return;
+        }
 
         // =====================================================
         // DETEKSI DEVICE IOS
@@ -205,8 +215,8 @@ function startHeartbeat() {
 
             fullscreen_status:
                 isFullscreen
-                ? 'FULL'
-                : 'WINDOWED',
+                ? 'FULLSCREEN'
+                : 'NOT_FULLSCREEN',
 
             browser_info:
                 navigator.userAgent,
@@ -219,5 +229,5 @@ function startHeartbeat() {
 
         });
 
-    }, 15000);
+    }, 30000);
 }
