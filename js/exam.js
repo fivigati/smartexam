@@ -52,29 +52,54 @@ function startExam() {
             // =====================================================
 
             isExamActive = true;
-
+            
             // fullscreen
             await enterFullscreen();
 
             // wake lock
-            aktifkanWakeLock();
+            await aktifkanWakeLock();
 
-            // heartbeat
-            startHeartbeat();
+            // =====================================================
+            // CREATE SESSION
+            // =====================================================
+            const sessionResult =
+                await createSession();
+            if (!sessionResult.success) {
+                showNotif(
+                    'Gagal membuat session',
+                    'error'
+                );
+                resetExamSession();
+                return;
+            }
+
+            // =====================================================
+            // CEK HEARTBEAT CONFIG
+            // =====================================================
+            
+            const heartbeatEnabled =
+                String(
+                    sessionData.config
+                    .heartbeat_enabled || 'FALSE'
+                ).toUpperCase() === 'TRUE';
+            
+            // =====================================================
+            // START HEARTBEAT
+            // =====================================================
+            
+            if (heartbeatEnabled) {
+                startHeartbeat();
+            }
 
             // timer
             startTimer(duration * 60);
-
         }, 1000);
-
     }
 
     // =====================================================
     // TOKEN SALAH
     // =====================================================
-
     else {
-
         showNotif(
             'Token ujian salah!',
             'error'
