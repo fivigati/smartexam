@@ -1,236 +1,373 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-  <title>Smart Exam 28 - Zenith Math</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    /* CSS GABUNGAN & REFINED UI */
-    body { font-family: 'Poppins', sans-serif; margin: 0; background: #F8FAFC; text-align: center; overflow: hidden; user-select: none; }
-    .header { height: 140px; background: linear-gradient(135deg, #FFD54F, #8B5CF6); border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; }
-    .card { background: white; width: 380px; max-width: 92%; margin: -60px auto 20px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); box-sizing: border-box; transition: .3s; }
-    input, select { width: 90%; padding: 14px; border-radius: 30px; border: 2px solid #8B5CF6; margin: 10px 0; font-size: 16px; text-align: center; outline: none; }
-    button { background: linear-gradient(135deg, #6C63FF, #8B5CF6); color: white; padding: 12px 40px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; transition: .2s; }
-    button:active { transform: scale(0.98); }
-
-    /* UJIAN TOOLBAR & PAGE */
-    #ujianPage { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #f0f2f5; z-index: 999; display: flex; flex-direction: column; }
-    .exam-header { background: white; padding: 10px 0; border-bottom: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; }
-    .topbar-controls { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; box-sizing: border-box; }
-    .toolbar { display: flex; gap: 6px; }
-    .toolbar button { width: 40px; height: 36px; font-size: 16px; padding: 0; border-radius: 8px; background: #f1f5f9; color: black; border: 1px solid #d1d5db; margin: 0; }
-    .exitBtn { background: #DC2626 !important; color: white !important; border: none !important; }
-    .timer { font-size: 16px; color: #DC2626; font-weight: bold; background: #fee2e2; padding: 5px 15px; border-radius: 20px; }
-    .iframe-container { flex: 1; margin: 8px; background: white; border-radius: 8px; border: 1px solid #d1d5db; overflow: hidden; position: relative; }
-    iframe { width: 100%; height: 100%; border: none; transition: transform 0.2s; transform-origin: 0 0; }
-
-    /* MODALS & LOCKSCREEN */
-    .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 10000; }
-    .popupCard { background: white; width: 320px; max-width: 85%; margin: 25vh auto; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-    #lockScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.98); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; color: white; }
-    #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #8B5CF6; z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Exam</title>
+    <link
+    rel="icon"
+    type="image/png"
+    href="favicon.png"
+        />
+    <meta
+    name="theme-color"
+    content="#0f172a"
+        />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
-  <div id="splash">
-    <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:120px; margin-bottom:20px;">
-    <h2 style="color:white;">Smart Exam</h2>
-    <div style="width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #FFD54F; border-radius:50%; animation: spin 1s linear infinite;"></div>
-  </div>
-
-  <div class="header"></div>
-
-  <!-- LANDING -->
-  <div id="landing" class="card">
-    <img src="https://drive.google.com/thumbnail?id=18TFLdzKVQoKqXUuIkD47kCE6MqJDHUiq&sz=w500" style="width:65px; margin-bottom:15px;">
-    <h2>Smart Exam</h2>
-    <p style="font-size:14px; color:#666; margin-top:-10px;">SMPN 28 Malang</p>
-    <input id="namaSiswa" list="listNama" placeholder="Nama Lengkap" autocomplete="off">
-    <datalist id="listNama"></datalist>
-    <input id="token" placeholder="Masukkan TOKEN" oninput="this.value=this.value.toUpperCase()">
-    <select id="kelas"><option value="">Memuat kelas...</option></select>
-    <button id="btnCek" onclick="cekToken()">CEK UJIAN</button>
-  </div>
-
-  <!-- INFO -->
-  <div id="examInfo" class="card" style="display:none">
-    <h3>Informasi Ujian</h3>
-    <p id="mapel"></p>
-    <p id="jadwal"></p>
-    <p id="durasi"></p>
-    <button onclick="mulaiUjian()">MULAI UJIAN</button>
-  </div>
-
-  <!-- UJIAN PAGE -->
-  <div id="ujianPage" style="display:none">
-    <div class="exam-header">
-      <div style="font-size: 11px; font-weight: 600; color: #64748b;">SMART EXAM 28</div>
-      <div class="topbar-controls">
-        <div class="toolbar">
-          <button onclick="refreshForm()">🔄</button>
-          <button onclick="zoomIn()">+</button>
-          <button onclick="zoomOut()">−</button>
-          <button onclick="exitUjian()" class="exitBtn">⏻</button>
+    <div id="notification" class="fixed top-8 left-1/2 -translate-x-1/2 flex items-center p-4 rounded-2xl bg-white shadow-2xl border border-slate-50 max-w-sm w-[90%] transition-all duration-500 -translate-y-[250%] z-[300]">
+        <div id="notif-color" class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+            <i id="notif-icon" class="text-white"></i>
         </div>
-        <div class="timer" id="timer">00:00</div>
-      </div>
+        <div id="notif-message" class="text-sm font-bold text-slate-700"></div>
     </div>
-    <div class="iframe-container">
-      <iframe id="formFrame"></iframe>
+
+    <div class="login-card fade-in">
+        <div class="avatar-container">
+            <div class="avatar-inner"><i class="fas fa-user-graduate"></i></div>
+        </div>
+
+        <div id="loginSection">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Selamat Datang</h1>
+                <p class="text-slate-400 text-sm mt-2">Sudah siap ujian hari ini?</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">ID SISWA</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-fingerprint text-indigo-300"></i>
+                        </div>
+                        <input type="text" id="studentId" placeholder="Masukkan ID Anda" required
+                            class="block w-full pl-11 pr-4 py-3 bg-[#F8FAFF] border border-[#EDF2FF] rounded-2xl text-slate-700 text-sm font-semibold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] px-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-400 font-medium">
+                        <input type="checkbox" id="rememberId" class="rounded"> Ingat ID saya
+                    </label>
+                    <a href="#" class="text-indigo-600 font-bold hover:underline">Bantuan</a>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-gradient w-full py-3.5 text-white font-bold rounded-2xl text-sm tracking-wide">
+                    Verifikasi ID
+                </button>
+            </form>
+        </div>
+
+        <div id="studentSection" class="hidden fade-in">
+            <h2 class="text-center text-lg font-extrabold text-slate-800 mb-5">Identitas Peserta</h2>
+            
+            <div class="bg-indigo-50/50 rounded-3xl p-5 mb-5 border border-indigo-100/50 space-y-4">
+                <div>
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Nama Lengkap</span>
+                    <div id="studentName" class="text-base font-bold text-slate-800 mt-0.5">-</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-indigo-100/60">
+                    <div>
+                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Kelas</span>
+                        <div id="studentClass" class="text-sm font-bold text-slate-700 mt-0.5">-</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Sekolah</span>
+                        <div id="studentSchool" class="text-sm font-bold text-slate-700 mt-0.5">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="examContainer" class="min-h-[100px]">
+                </div>
+        </div>
+
+        <div class="mt-8 pt-5 border-t border-slate-50 flex gap-3 items-start">
+            <div class="bg-slate-50 p-2.5 rounded-xl text-slate-300 text-xs">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <p class="text-[10px] font-medium text-slate-400 leading-relaxed">
+                Akses ujian diawasi sistem secara otomatis. Pastikan koneksi stabil dan dilarang berpindah aplikasi.
+            </p>
+        </div>
     </div>
-  </div>
 
-  <!-- LOCK SCREEN -->
-  <div id="lockScreen">
-    <h2 style="color:#FFD54F;">⚠️ PERINGATAN</h2>
-    <p id="lockMsg">Anda keluar dari mode ujian!</p>
-    <button onclick="kembaliKeUjian()" style="background:#FFD54F; color:black; width:auto; padding:15px 40px; border-radius:30px; font-weight:bold;">LANJUTKAN UJIAN</button>
-  </div>
+    <div id="examWrapper" class="fixed inset-0 bg-[#F4F7FF] z-[200] hidden flex-col">
 
-  <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
+    <!-- HEADER -->
+    <div class="bg-white border-b border-slate-200 px-3 py-3 shadow-sm">
 
-  <script>
-      const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyC-O4sRF355UTWdddYZTISl4A0f_nZpxT1K4CMYpHDJ4HwKyPrIkiVkDbc6hhFxhOlYA/exec"; 
-    const APP = { 
-        ujianAktif: false, warningCount: 0, maxWarning: 3, zoom: 1, 
-        exitLimit: 10, alarm: document.getElementById("alarmAudio") 
-    };
+    <div class="flex flex-wrap items-center justify-between gap-3">
 
-    async function callAPI(action, data = {}) {
-        try {
-            const res = await fetch(BACKEND_URL, { method: "POST", body: JSON.stringify({ action, data }) });
-            return await res.json();
-        } catch (e) {
-            console.error("API Error:", e);
-            return null;
-        }
-    }
+        <!-- BRAND -->
+        <div class="flex items-center gap-3 min-w-0">
 
-    // PERBAIKAN URUTAN LOADING AGAR TIDAK NYANGKUT
-    // --- INITIAL LOAD (KEMBALI KE METODE STABIL) ---
-    window.onload = function() {
-        // 1. Langsung panggil fungsi load data
-        loadKelasDinamis();
-        loadSiswaDinamis();
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center shrink-0">
+                <i class="fas fa-graduation-cap text-indigo-600"></i>
+            </div>
+
+            <div class="min-w-0">
+                <div class="text-sm font-extrabold text-slate-800 leading-tight whitespace-nowrap">
+                    Smart Exam
+                </div>
+                <div class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                    Secure Browser
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT AREA -->
+        <div class="flex items-center gap-2 ml-auto">
+
+            <!-- BUTTONS -->
+            <div class="flex items-center gap-2">
+
+                <button onclick="refreshExam()"
+                    class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all text-slate-700">
+                    <i class="fas fa-rotate-right text-sm"></i>
+                </button>
+
+                <button onclick="zoomExam('in')"
+                    class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all text-slate-700">
+                    <i class="fas fa-plus text-sm"></i>
+                </button>
+
+                <button onclick="zoomExam('out')"
+                    class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all text-slate-700">
+                    <i class="fas fa-minus text-sm"></i>
+                </button>
+
+                <button onclick="closeExam()"
+                    class="w-10 h-10 rounded-2xl bg-rose-500 hover:bg-rose-600 transition-all text-white shadow-sm">
+                    <i class="fas fa-power-off text-sm"></i>
+                </button>
+
+            </div>
+
+            <!-- TIMER -->
+            <div id="examTimer"
+            class="bg-rose-50 text-rose-600 font-bold text-sm px-4 py-2 rounded-full whitespace-nowrap text-center min-w-[105px] font-mono shrink-0">
+                00:00:00
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+    <!-- CONTENT -->
+    <div class="flex-1 p-2 bg-[#f0f2f5] min-h-0">
+
+        <div class="h-full bg-white rounded-[10px] border border-slate-200 overflow-hidden">
+
+            <iframe
+                id="examIframe"
+                src=""
+                class="w-full border-none"
+                style="width:100%; height:100%">
+            </iframe>
+
+    </div>
+    </div>
+    <!-- FOOTER -->
+    <div class="text-center text-[11px] text-slate-500 py-4 leading-5">
+    © 2026 Smart Exam. All rights reserved
+    </div>
         
-        // 2. Splash screen hilang otomatis setelah 2.5 detik
-        setTimeout(() => {
-            const splash = document.getElementById('splash');
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 500);
-        }, 2500);
-    };
+    <!-- Elemen Audio untuk Alarm -->
+    <audio id="alarmAudio" loop preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
 
-    async function loadKelasDinamis() {
-        const list = await callAPI('getKelasList');
-        const select = document.getElementById("kelas");
-        if(list && list.length > 0) {
-            select.innerHTML = '<option value="">Pilih Kelas</option>';
-            list.forEach(k => {
-                let o = document.createElement("option");
-                o.value = k; o.text = k; select.appendChild(o);
-            });
-        } else {
-            select.innerHTML = '<option value="">Gagal memuat kelas</option>';
-        }
-    }
+<!-- LockScreen untuk memaksa Fullscreen kembali -->
+<div id="lockScreen"
+class="hidden fixed inset-0 bg-slate-900/95 z-[20000] flex-col items-center justify-center text-white text-center">
+    <i class="fas fa-lock text-5xl text-rose-500 mb-5"></i>
+    <h2 class="text-2xl font-bold mb-2">Layar Terkunci</h2>
+    <p class="opacity-70 mb-8 px-10">Sistem mendeteksi Anda keluar dari mode ujian.<br>Klik tombol di bawah untuk kembali.</p>
+    <button onclick="kembaliKeFullscreen()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl font-bold shadow-xl transition-all">
+        LANJUTKAN UJIAN
+    </button>
+</div>
 
-    async function loadSiswaDinamis() {
-        const dataSiswa = await callAPI('getAllNamaSiswa');
-        const datalist = document.getElementById("listNama");
-        if(dataSiswa && datalist) {
-            datalist.innerHTML = ""; 
-            dataSiswa.forEach(nama => {
-                let option = document.createElement("option");
-                option.value = nama; datalist.appendChild(option);
-            });
-        }
-    }
-   async function cekToken() {
-      const btn = document.getElementById("btnCek");
-      btn.innerText = "MENGECEK..."; btn.disabled = true;
-      const res = await callAPI('getExamByToken', { token: document.getElementById("token").value, kelas: document.getElementById("kelas").value });
-      if(res.status) {
-        Object.assign(APP, res);
-        APP.namaSiswa = document.getElementById("namaSiswa").value;
-        const mhs = await callAPI('cariDataSiswa', { nama: APP.namaSiswa });
-        APP.kelasSiswa = mhs.found ? mhs.kelas : document.getElementById("kelas").value;
-        APP.ruangSiswa = mhs.found ? mhs.ruang : "Luar";
-        document.getElementById("landing").style.display = "none";
-        document.getElementById("examInfo").style.display = "block";
-        document.getElementById("mapel").innerText = "Mapel: " + res.mapel;
-        document.getElementById("jadwal").innerText = `Waktu: ${res.mulai} - ${res.selesai}`;
-        document.getElementById("durasi").innerText = `Durasi: ${res.durasi} Menit (${APP.ruangSiswa})`;
-      } else { alert(res.message); }
-      btn.innerText = "CEK UJIAN"; btn.disabled = false;
-    }
+<!-- Modal Exit Ultra-Compact -->
+<div id="modalExit" class="fixed inset-0 bg-slate-900/90 z-[30000] hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-[320px] rounded-[2rem] p-5 shadow-2xl text-center fade-in">
+        
+        <!-- Langkah 1: Konfirmasi Cepat -->
+        <div id="stepConfirmation">
+            <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <h2 class="text-lg font-black text-slate-800 mb-1">Akhiri Ujian?</h2>
+            <p class="text-slate-500 text-[11px] mb-5 leading-relaxed px-2">
+                Pastikan jawaban sudah di-<span class="font-bold text-indigo-600">SUBMIT</span> sebelum keluar.
+            </p>
+            <div class="space-y-2">
+                <button
+                id="btnCloseExam"
+                onclick="goToTokenStep()"
+                disabled
+                class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs transition-all opacity-50 cursor-not-allowed">
+                SAYA SUDAH SUBMIT
+                </button>
+                <button onclick="tutupModalExit()" class="w-full bg-slate-100 text-slate-500 font-bold py-3 rounded-xl text-xs">KEMBALI</button>
+            </div>
+        </div>
 
-    function mulaiUjian() {
-      APP.ujianAktif = true; APP.waktuMulai = Date.now();
-      document.getElementById("examInfo").style.display = "none";
-      document.getElementById("ujianPage").style.display = "flex";
-      document.getElementById("formFrame").src = APP.linkForm + "?embedded=true";
-      paksaFullscreen(); startTimer(); heartbeat("ON");
-    }
+        <!-- Langkah 2: Input Token Cepat -->
+        <div id="stepToken" class="hidden">
+            <h2 class="text-base font-black text-slate-800 mb-4 uppercase tracking-tighter">Masukkan Token Keluar</h2>
+            <div class="mb-4">
+                <input type="text" id="exitTokenInput" 
+                    placeholder="TOKEN" 
+                    autocomplete="off" autocorrect="off" spellcheck="false"
+                    class="block w-full px-2 py-3 text-center text-lg tracking-[0.2em] text-rose-600 rounded-xl font-black uppercase bg-slate-50 border border-slate-100 focus:bg-white focus:border-rose-500 outline-none transition-all">
+                <p id="exitErrorMsg" class="text-rose-500 text-[9px] font-bold mt-2 hidden uppercase">Token Salah!</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="konfirmasiKeluar()" class="flex-1 bg-rose-500 text-white font-bold py-3 rounded-xl text-xs transition-all">KELUAR</button>
+                <button onclick="tutupModalExit()" class="flex-1 bg-slate-100 text-slate-500 font-bold py-3 rounded-xl text-xs"> BATAL </button>
+            </div>
+        </div>
 
-    function startTimer() {
-      setInterval(() => {
-        const sisa = (APP.durasiUjian * 60000) - (Date.now() - APP.waktuMulai);
-        if(sisa <= 0) location.reload();
-        const m = Math.floor(sisa / 60000), s = Math.floor((sisa % 60000) / 1000);
-        document.getElementById("timer").innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-      }, 1000);
-    }
+    </div>
+</div>
+<!-- MODAL WAKTU HABIS -->
+<div id="timeUpModal"
+    class="hidden fixed inset-0 z-[9999] bg-slate-900/70 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl fade-in">
+        <div class="w-20 h-20 mx-auto rounded-full bg-rose-100 flex items-center justify-center mb-4">
+            <i class="fas fa-clock text-3xl text-rose-500"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-800 mb-2">
+            Waktu Ujian Habis
+        </h2>
+        <p class="text-sm text-slate-500 mb-5 leading-relaxed">
+            Sistem akan menutup ujian secara otomatis.
+        </p>
+        <div class="bg-slate-100 rounded-2xl py-3">
+            <span class="text-3xl font-black text-indigo-600"
+                id="timeUpCountdown">
+                5
+            </span>
+        </div>
+    </div>
+</div>
+<!-- =====================================================
+     SECURITY MODAL UNIVERSAL
+===================================================== -->
+<div id="securityModal"
+    class="hidden fixed inset-0 z-[99999] bg-slate-950/90 backdrop-blur-md items-center justify-center p-5">
 
-    function tanganiPelanggaran(jenis) {
-      if(!APP.ujianAktif) return;
-      APP.warningCount++; APP.alarm.play();
-      document.getElementById("lockScreen").style.display = "flex";
-      document.getElementById("lockMsg").innerText = `${jenis} (Peringatan ke-${APP.warningCount})`;
-      callAPI('simpanLog', { nama: APP.namaSiswa, kelas: APP.kelasSiswa, ruang: APP.ruangSiswa, mapel: APP.mapelUjian, jenis: `${jenis} (${APP.warningCount})` });
-      if(APP.warningCount >= APP.maxWarning) { alert("Batas pelanggaran tercapai!"); location.reload(); }
-    }
+    <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-modalPop">
 
-    function paksaFullscreen() {
-      const doc = document.documentElement;
-      if (doc.requestFullscreen) doc.requestFullscreen();
-      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-      document.getElementById("lockScreen").style.display = "none";
-    }
+        <!-- HEADER -->
+        <div id="securityModalHeader"
+            class="px-6 pt-8 pb-10 text-center bg-gradient-to-br from-rose-500 to-red-600">
 
-    function kembaliKeUjian() { APP.alarm.pause(); APP.alarm.currentTime = 0; paksaFullscreen(); }
+            <div id="securityModalIconWrapper"
+                class="w-24 h-24 mx-auto rounded-full bg-white/15 border border-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
 
-    function heartbeat(st) { callAPI('heartbeat', { nama: APP.namaSiswa, mapel: APP.mapelUjian, status: st }); }
+                <i id="securityModalIcon"
+                    class="fas fa-shield-halved text-white text-4xl">
+                </i>
 
-    setInterval(() => {
-      if(APP.ujianAktif && !document.hidden) {
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        if(!isIOS && !document.fullscreenElement) tanganiPelanggaran("Keluar Fullscreen");
-        heartbeat("ON");
-      }
-    }, 15000);
+            </div>
 
-    document.addEventListener("visibilitychange", () => {
-      if(document.hidden && APP.ujianAktif) { tanganiPelanggaran("Pindah Tab"); heartbeat("AWAY"); }
-    });
+            <h2 id="securityModalTitle"
+                class="text-white text-2xl font-extrabold mt-5">
 
-    function exitUjian() {
-      const sisaMenit = (APP.durasiUjian * 60000 - (Date.now() - APP.waktuMulai)) / 60000;
-      if(sisaMenit > APP.exitLimit) return alert(`Belum bisa keluar! Tunggu ${Math.ceil(sisaMenit - APP.exitLimit)} menit lagi.`);
-      const token = prompt("Masukkan Token Keluar:");
-      if(token === APP.exit) { heartbeat("OUT"); location.reload(); } else alert("Token Salah!");
-    }
+                Keamanan Sistem
 
-    function refreshForm() { document.getElementById("formFrame").src = APP.linkForm + "?embedded=true"; }
-    function zoomIn() { if(APP.zoom < 1.5) { APP.zoom += 0.1; applyZoom(); } }
-    function zoomOut() { if(APP.zoom > 0.7) { APP.zoom -= 0.1; applyZoom(); } }
-    function applyZoom() { 
-      const f = document.getElementById("formFrame");
-      f.style.width = (100/APP.zoom)+"%"; f.style.height = (100/APP.zoom)+"%";
-      f.style.transform = `scale(${APP.zoom})`; 
-    }
-  </script>
+            </h2>
+
+            <p id="securityModalSubtitle"
+                class="text-rose-100 text-sm mt-2 leading-relaxed px-3">
+
+                Sistem mendeteksi aktivitas tidak valid.
+
+            </p>
+
+        </div>
+
+        <!-- CONTENT -->
+        <div class="px-6 py-6 text-center">
+
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-5">
+
+                <p id="securityModalMessage"
+                    class="text-sm text-slate-600 leading-relaxed">
+
+                    Sesi ujian akan ditutup otomatis demi menjaga keamanan sistem.
+
+                </p>
+
+            </div>
+
+            <!-- LOADING -->
+            <div class="flex items-center justify-center gap-2 text-sm text-slate-400">
+
+                <div class="w-2 h-2 rounded-full bg-rose-400 animate-bounce"></div>
+                <div class="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.15s]"></div>
+                <div class="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.3s]"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+        
+<!-- =====================================================
+     OFFLINE BANNER
+===================================================== -->
+<div id="offlineBanner"
+    class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[999999]">
+
+    <div class="bg-amber-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-modalPop">
+
+        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+
+            <i class="fas fa-wifi text-lg"></i>
+
+        </div>
+
+        <div>
+
+            <div class="font-extrabold text-sm">
+                Koneksi Terputus
+            </div>
+
+            <div class="text-[11px] text-amber-100 leading-tight">
+                Sistem mencoba menyambungkan kembali...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/network.js"></script>
+
+<script src="js/notification.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/exam.js"></script>
+<script src="js/heartbeat.js"></script>
+
+<script src="js/fullscreen.js"></script>
+<script src="js/security.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/app.js"></script>
+
 </body>
 </html>
