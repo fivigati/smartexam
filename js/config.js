@@ -1,4 +1,4 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbyppJyo4jYIpsa4GFrG7QKD8TrK6S7DRiAxLWVY3mtzUUOAQOEIk3hZRwEu9QLx1Bm7eQ/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbyYSA1eH6tWAtu2C248XJ4qo86USUgBXHBUQLOD1N3jeJRIyq3JACUmqgUr9k84A78gEw/exec';
     window.correctToken = "";
     window.examLink = "";
     window.currentZoom = 100;
