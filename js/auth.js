@@ -22,7 +22,7 @@
     // Simpan Session Data
 sessionData.nisn = id;
 sessionData.npsn = r.student.school_npsn;
-sessionData.exam_id = r.exam.subject;
+sessionData.subject = r.exam.subject;
 sessionData.exit_token =
     r.exam.exit ||
     r.exam.exit_token ||
