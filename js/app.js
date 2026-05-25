@@ -527,6 +527,21 @@ function tutupModalExit() {
     document.getElementById('modalExit').classList.replace('flex', 'hidden');
     document.getElementById('stepToken').classList.add('hidden');
     document.getElementById('stepConfirmation').classList.remove('hidden');
+    
+    // --- TAMBAHAN: BERSIHKAN STATUS TOMBOL ---
+    const btnExit = document.getElementById('btnFinalExit');
+    if (btnExit) {
+        btnExit.disabled = false;
+        btnExit.innerHTML = 'KELUAR'; // Kembalikan teks asli
+    }
+    
+    const btnSubmit = document.getElementById('btnCloseExam');
+    if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = 'SAYA SUDAH SUBMIT';
+    }
+    // ----------------------------------------
+
     document.getElementById('exitTokenInput').value = "";
     document.getElementById('exitErrorMsg').classList.add('hidden');
 }
