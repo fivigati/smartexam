@@ -532,7 +532,10 @@ function tutupModalExit() {
 }
 
 function goToTokenStep(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (e) { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+    }
     const btn = document.getElementById('btnCloseExam');
     if (btn) {
         btn.disabled = true;
@@ -548,14 +551,27 @@ function goToTokenStep(e) {
 }
 
 async function konfirmasiKeluar(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (e) { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+    }
+    
     const inputUser = document.getElementById('exitTokenInput').value.trim().toUpperCase();
     const tokenSistem = String(sessionData.exit_token || "").trim().toUpperCase();
-    const btnExit = e ? e.target : null; 
-    const originalText = btnExit ? btnExit.innerText : 'KELUAR';
+    
+    // 1. BIDIK TOMBOL SECARA ABSOLUT MENGGUNAKAN ID (ANTI SALAH SASARAN)
+    const btnExit = document.getElementById('btnFinalExit'); 
+    const originalText = 'KELUAR';
+
+    // 2. PROTEKSI AWAL: Jika kotak input masih kosong, hadang di tempat dan jangan biarkan loading!
+    if (inputUser === "") {
+        document.getElementById('exitErrorMsg').classList.remove('hidden');
+        document.getElementById('exitTokenInput').focus();
+        return; 
+    }
 
     if (inputUser === tokenSistem && tokenSistem !== "") {
-        if (btnExit && btnExit.tagName === 'BUTTON') {
+        if (btnExit) {
             btnExit.disabled = true;
             btnExit.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> KELUAR...';
         }
@@ -577,7 +593,12 @@ async function konfirmasiKeluar(e) {
         document.getElementById('exitErrorMsg').classList.remove('hidden');
         const tokenInput = document.getElementById('exitTokenInput');
         if (tokenInput) { tokenInput.value = ""; tokenInput.focus(); }
-        if (btnExit && btnExit.tagName === 'BUTTON') { btnExit.disabled = false; btnExit.innerText = originalText; }
+        
+        // 3. KEMBALIKAN TOMBOL KE STATUS SEMULA SECARA PAKSA TANPA SYARAT TAGNAME
+        if (btnExit) { 
+            btnExit.disabled = false; 
+            btnExit.innerText = originalText; 
+        }
     }
 }
 
