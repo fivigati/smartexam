@@ -1,247 +1,82 @@
-// =====================================================
-// KIRIM HEARTBEAT KE SERVER
-// =====================================================
-
 function kirimHeartbeat(payload) {
-
     fetch(scriptURL, {
-
-    method: 'POST',
-
-    headers: {
-        'Content-Type': 'application/json'
-    },
-
-    body: JSON.stringify(payload)
-
-})
-
-.then(async res => {
-
-    if (!res.ok) {
-
-        throw new Error(
-            'Server Error'
-        );
-    }
-
-    return await res.json();
-})
-
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
     .then(res => {
-
-        // Hindari spam closing
         if (window.isForceClosing) return;
 
-        // =====================================================
-        // MULTI DEVICE DETECTED
-        // =====================================================
-
-        if (
-            !res.success &&
-            res.message
-        ) {
-
+        // DETEKSI BLOKIRAN GATEKEEPER MULTI-DEVICE
+        if (!res.success) {
             showSecurityModal({
-
-                title:
-                    "Akses Ditolak",
-
-                subtitle:
-                    "Akun terdeteksi aktif di perangkat lain.",
-
-                message:
-                    "Sesi ujian ini akan ditutup demi menjaga keamanan sistem.",
-
-                icon:
-                    "fa-mobile-screen"
-
+                title: "Akses Ditolak",
+                subtitle: "Akun terdeteksi aktif di perangkat lain.",
+                message: res.message || "Sesi ujian ini dikunci demi menjaga keamanan sistem.",
+                icon: "fa-mobile-screen"
             });
-
             return;
         }
 
-        // =====================================================
-        // AUTO KICKED
-        // =====================================================
-
+        // DETEKSI OTOMATIS JIKA KENA BAN / AUTO-KICK
         if (res.kicked) {
-
             showSecurityModal({
-
-                title:
-                    "Ujian Dihentikan",
-
-                subtitle:
-                    "Batas pelanggaran telah tercapai.",
-
-                message:
-                    "Akun ujian Anda dinonaktifkan sementara oleh sistem.",
-
-                icon:
-                    "fa-ban"
-
+                title: "Ujian Dihentikan",
+                subtitle: "Batas pelanggaran telah tercapai.",
+                message: "Akun ujian Anda dinonaktifkan sementara oleh sistem.",
+                icon: "fa-ban"
             });
         }
-
     })
-
     .catch(err => {
-
-        console.log(
-            'Heartbeat Error:',
-            err
-        );
-
+        console.log('Heartbeat Error:', err);
     });
 }
 
-
-// =====================================================
-// START HEARTBEAT
-// =====================================================
-
 function startHeartbeat() {
-
-    // =====================================================
-    // KIRIM STATUS AWAL
-    // =====================================================
-
+    // Kirim ketukan inisialisasi awal
     kirimHeartbeat({
-
         action: 'recordHeartbeat',
-
         npsn: sessionData.npsn,
-
         nisn: sessionData.nisn,
-
-        subject: sessionData.subject,
-
+        exam_id: sessionData.exam_id,
         session_status: 'ONLINE',
-
-        fullscreen_status: 'FULLSCREEN',
-
-        browser_info:
-            navigator.userAgent,
-
-        device_info:
-            `${navigator.platform} | ${navigator.vendor}`,
-
-        ip_address:
-            sessionData.userIP
-
+        fullscreen_status: 'FULL',
+        browser_info: navigator.userAgent,
+        device_info: `${navigator.platform} | ${navigator.vendor}`,
+        ip_address: sessionData.userIP
     });
 
-
-    // =====================================================
-    // INTERVAL HEARTBEAT
-    // =====================================================
-
+    // Jalankan Interval Pengawasan Real-Time
     sessionData.heartbeatInterval = setInterval(() => {
+        if (!isExamActive) return;
 
-        if (!isExamActive) {
-            
-            clearInterval(
-                sessionData
-                .heartbeatInterval
-            );
+        // Pengaman ekstra: Jika di tengah jalan config heartbeat mati, bersihkan interval
+        if (!sessionData.heartbeat_enabled) {
+            clearInterval(sessionData.heartbeatInterval);
             return;
         }
 
-        // =====================================================
-        // DETEKSI DEVICE IOS
-        // =====================================================
-
-        const isIOS =
-            /iPhone|iPad|iPod/i
-            .test(navigator.userAgent);
-
-        // =====================================================
-        // CEK VISIBILITY
-        // =====================================================
-
-        const isVisible =
-            !document.hidden;
-
-        // =====================================================
-        // CEK FULLSCREEN
-        // =====================================================
-
-        const isFullscreen =
-            !!document.fullscreenElement ||
-            !!document.webkitFullscreenElement;
-
-        // =====================================================
-        // DEFAULT STATUS
-        // =====================================================
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isVisible = !document.hidden;
+        const isFullscreen = !!document.fullscreenElement || !!document.webkitFullscreenElement;
 
         let st = "ONLINE";
-
-        // =====================================================
-        // PINDAH TAB / APP
-        // =====================================================
-
-        if (!isVisible) {
-
+        if (!isVisible || (!isIOS && !isFullscreen)) {
             st = "AWAY";
-
         }
-
-        // =====================================================
-        // KELUAR FULLSCREEN
-        // =====================================================
-
-        else if (
-            !isIOS &&
-            !isFullscreen
-        ) {
-
-            st = "AWAY";
-
-        }
-
-        // =====================================================
-        // IOS TETAP ONLINE SELAMA VISIBLE
-        // =====================================================
-
-        else {
-
-            st = "ONLINE";
-
-        }
-
-
-        // =====================================================
-        // KIRIM HEARTBEAT
-        // =====================================================
 
         kirimHeartbeat({
-
             action: 'recordHeartbeat',
-
             npsn: sessionData.npsn,
-
             nisn: sessionData.nisn,
-
-            subject: sessionData.subject,
-
+            exam_id: sessionData.exam_id,
             session_status: st,
-
-            fullscreen_status:
-                isFullscreen
-                ? 'FULLSCREEN'
-                : 'NOT_FULLSCREEN',
-
-            browser_info:
-                navigator.userAgent,
-
-            device_info:
-                `${navigator.platform} | ${navigator.vendor}`,
-
-            ip_address:
-                sessionData.userIP
-
+            fullscreen_status: isFullscreen ? 'FULL' : 'WINDOWED',
+            browser_info: navigator.userAgent,
+            device_info: `${navigator.platform} | ${navigator.vendor}`,
+            ip_address: sessionData.userIP
         });
-
     }, 15000);
 }
