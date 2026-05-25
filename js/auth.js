@@ -1,61 +1,57 @@
 // --- Update Logic Login (Auto-save & Session Data) ---
     async function handleLogin(e) {
-        e.preventDefault();
-        const id = document.getElementById('studentId').value;
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memverifikasi...';
-        
-        try {
-            const res = await fetch(scriptURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'verifyStudent',
-                    nisn: id
-                })
-            });
-            const r = await res.json();
-            if(r.success) {
-                // Auto-save ID
-                const remember = document.getElementById('rememberId').checked;
-
-                if (remember) {
+    e.preventDefault();
+    const id = document.getElementById('studentId').value;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memverifikasi...';
+    
+    try {
+        const res = await fetch(scriptURL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verifyStudent', nisn: id }) 
+        });
+        const r = await res.json();
+        if(r.success) {
+            const remember = document.getElementById('rememberId').checked;
+            if (remember) {
                 localStorage.setItem('smartExam_id', id);
-                } else {
-                localStorage.removeItem('smartExam_id');
-                }
-                
-    // Simpan Session Data
-sessionData.nisn = id;
-sessionData.npsn = r.student.school_npsn;
-sessionData.subject = r.exam.subject;
-sessionData.exit_token =
-    r.exam.exit ||
-    r.exam.exit_token ||
-    "";
-    // Config sekolah
-sessionData.minExitMinutes =
-    r.config.min_exit_minutes ?? 0;
-sessionData.config = r.config;
-
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('studentSection').classList.remove('hidden');
-                document.getElementById('studentName').innerText = r.student.full_name;
-                document.getElementById('studentClass').innerText = r.student.class_name;
-                document.getElementById('studentSchool').innerText = r.school.school_name;
-                document.getElementById('studentSection').dataset.duration = r.exam.duration || 90;
-                renderExam(r.exam);
-                showNotif('Identitas terverifikasi', 'success');
             } else {
-                showNotif(r.message || 'ID tidak ditemukan', 'error');
+                localStorage.removeItem('smartExam_id');
             }
-        } catch (err) { showNotif('Gagal terhubung ke server', 'error'); } 
-        finally { btn.disabled = false; btn.innerHTML = 'Verifikasi ID'; }
-    }
+            
+            // Simpan Data Profil & Paket Sekolah
+            sessionData.nisn = id;
+            sessionData.npsn = r.student.school_npsn;
+            sessionData.exam_id = r.exam.exam_id || r.exam.subject; 
+            sessionData.exit_token = r.exam.exit || r.exam.exit_token || "";
+            
+            // Konfigurasi Paket Hasil Pemetaan Server
+            sessionData.minExitMinutes = r.config.min_exit_minutes;
+            sessionData.max_violation = r.config.max_violation;
+            sessionData.auto_kick_enabled = r.config.auto_kick_enabled;
+            sessionData.allow_multi_device = r.config.allow_multi_device;
+            sessionData.heartbeat_enabled = r.config.heartbeat_enabled;
 
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('studentSection').classList.remove('hidden');
+            document.getElementById('studentName').innerText = r.student.full_name;
+            document.getElementById('studentClass').innerText = r.student.class_name;
+            document.getElementById('studentSchool').innerText = r.school.school_name;
+            document.getElementById('studentSection').dataset.duration = r.exam.duration || 90;
+            renderExam(r.exam);
+            showNotif('Identitas terverifikasi', 'success');
+        } else {
+            showNotif(r.message || 'ID tidak ditemukan', 'error');
+        }
+    } catch (err) { 
+        showNotif('Gagal terhubung ke server', 'error'); 
+    } finally { 
+        btn.disabled = false; 
+        btn.innerHTML = 'Verifikasi ID'; 
+    }
+}
     function renderExam(exam) {
         const container = document.getElementById('examContainer');
         if(exam && exam.status === 'ACTIVE') {
