@@ -619,6 +619,7 @@ async function konfirmasiKeluar(e) {
 
 function resetExamSession() {
     isExamActive = false;
+      window.isForceClosing = false;
     if (sessionData.heartbeatInterval) clearInterval(sessionData.heartbeatInterval);
     if (timerInterval) clearInterval(timerInterval);
     stopAlarm();
