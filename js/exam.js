@@ -3,114 +3,47 @@
 // =====================================================
 
 function startExam() {
+    const input = document.getElementById('tokenInput').value.toUpperCase().trim();
 
-    const input =
-        document.getElementById(
-            'tokenInput'
-        ).value
-        .toUpperCase()
-        .trim();
-
-    // =====================================================
-    // TOKEN VALID
-    // =====================================================
-
-    if (
-        input ===
-        correctToken.toUpperCase()
-    ) {
-
-        showNotif(
-            'Token valid! Membuka soal...',
-            'success'
-        );
+    if (input === correctToken.toUpperCase()) {
+        showNotif('Token valid! Membuka soal...', 'success');
 
         setTimeout(async () => {
+            const duration = parseInt(document.getElementById('studentSection').dataset.duration);
 
-            const duration =
-                parseInt(
-                    document.getElementById(
-                        'studentSection'
-                    ).dataset.duration
-                ) || 90;
-
-            // tampilkan wrapper ujian
-            document.getElementById(
-                'examWrapper'
-            ).classList.replace(
-                'hidden',
-                'flex'
-            );
-
-            // load iframe
-            document.getElementById(
-                'examIframe'
-            ).src = examLink;
-
-            // =====================================================
-            // AKTIFKAN MODE UJIAN
-            // =====================================================
+            document.getElementById('examWrapper').classList.replace('hidden', 'flex');
+            document.getElementById('examIframe').src = examLink;
 
             isExamActive = true;
-            
-            // fullscreen
             await enterFullscreen();
-
-            // wake lock
-            await aktifkanWakeLock();
+            aktifkanWakeLock();
 
             // =====================================================
-            // CREATE SESSION
+            // MANAJEMEN HEMAT SERVER BERDASARKAN PAKET SEKOLAH
             // =====================================================
-            const sessionResult =
-                await createSession();
-            if (
-                !sessionResult ||
-                !sessionResult.success
-            ) {
-                
-                showNotif(
-                    'Gagal membuat session',
-                    'error'
-                
-                );
-                
-                resetExamSession();
-                
-                return;
-            }
-
-            // =====================================================
-            // CEK HEARTBEAT CONFIG
-            // =====================================================
-            
-            const heartbeatEnabled =
-                String(
-                    sessionData.config
-                    .heartbeat_enabled || 'FALSE'
-                ).toUpperCase() === 'TRUE';
-            
-            // =====================================================
-            // START HEARTBEAT
-            // =====================================================
-            
-            if (heartbeatEnabled) {
+            if (sessionData.heartbeat_enabled) {
+                // Jika paket PREMIUM: Aktifkan siklus interval 15-detik berkala
                 startHeartbeat();
+            } else {
+                // Jika paket HEMAT: CUKUP TEMBAK 1 KALI SAAT MASUK (Gatekeeper Beraksi)
+                kirimHeartbeat({
+                    action: 'recordHeartbeat',
+                    npsn: sessionData.npsn,
+                    nisn: sessionData.nisn,
+                    exam_id: sessionData.exam_id,
+                    session_status: 'ONLINE',
+                    fullscreen_status: 'FULL',
+                    browser_info: navigator.userAgent,
+                    device_info: `${navigator.platform} | ${navigator.vendor}`,
+                    ip_address: sessionData.userIP
+                });
             }
 
-            // timer
             startTimer(duration * 60);
         }, 1000);
-    }
 
-    // =====================================================
-    // TOKEN SALAH
-    // =====================================================
-    else {
-        showNotif(
-            'Token ujian salah!',
-            'error'
-        );
+    } else {
+        showNotif('Token ujian salah!', 'error');
     }
 }
 
