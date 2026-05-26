@@ -422,11 +422,31 @@ document.addEventListener("fullscreenchange", () => {
 });
 
 if (isIOS) {
-    window.addEventListener("blur", () => { handleIosBlurAction(); });
-    window.addEventListener("pagehide", () => { handleIosBlurAction(); });
+
+    // iOS Safari terlalu sensitif terhadap blur
+    // jadi blur diabaikan total
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            handleIosBlurAction();
+        } else {
+            stopAlarm();
+
+            if (iosViolationTimeout) {
+                clearTimeout(iosViolationTimeout);
+                iosViolationTimeout = null;
+            }
+        }
+    });
+
+    window.addEventListener("pagehide", () => {
+        handleIosBlurAction();
+    });
+
     window.addEventListener("focus", () => {
         if (isExamActive) {
             stopAlarm();
+
             if (iosViolationTimeout) {
                 clearTimeout(iosViolationTimeout);
                 iosViolationTimeout = null;
@@ -437,15 +457,17 @@ if (isIOS) {
 
 function handleIosBlurAction() {
     if (!isExamActive || window.isForceClosing) return;
+
     document.getElementById('alarmAudio').play();
+
     document.getElementById('lockScreen').classList.remove('hidden');
     document.getElementById('lockScreen').classList.add('flex');
 
     if (!iosViolationTimeout) {
         iosViolationTimeout = setTimeout(() => {
             triggerViolation("PINDAH TAB / MINIMIZE (iOS)");
-            iosViolationTimeout = null; 
-        }, 3000);
+            iosViolationTimeout = null;
+        }, 8000);
     }
 }
 
