@@ -294,6 +294,7 @@ function tampilkanModalWaktuHabis() {
 async function kirimHeartbeat(payload) {
     try {
         const res = await eksekusiGAS(payload);
+       console.log("Respon Server:", res);
         if (window.isForceClosing) return;
 
         // 1. JIKA SERVER MENJAWAB SESI TIDAK VALID/TERHAPUS 
