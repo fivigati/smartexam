@@ -344,7 +344,15 @@ async function kirimHeartbeat(payload) {
                 message: "Akun ujian Anda dinonaktifkan sementara oleh sistem.",
                 icon: "fa-ban"
             });
+           return; // Berhenti di sini agar tidak memproses logic selanjutnya
         }
+       if (res.exam_link && typeof currentExamLink !== 'undefined' && res.exam_link !== currentExamLink) {
+            currentExamLink = res.exam_link;
+            document.getElementById('examIframe').src = currentExamLink;
+            // Opsional: berikan notifikasi kecil (toast) agar siswa tahu link diperbarui
+            console.log("Link ujian diperbarui oleh Admin."); 
+        }
+
     } catch (err) {
         console.log('Heartbeat Error:', err);
     }
