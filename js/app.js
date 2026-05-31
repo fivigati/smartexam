@@ -296,21 +296,42 @@ async function kirimHeartbeat(payload) {
         const res = await eksekusiGAS(payload);
         if (window.isForceClosing) return;
 
+        // 1. JIKA SERVER MENJAWAB SESI TIDAK VALID/TERHAPUS 
+        // (Misalnya: Admin menekan Reset, Multi-Device, atau Sesi hilang dari database)
         if (!res.success) {
+            // Hentikan semua interval dan bersihkan layar ujian
             if (sessionData.heartbeatInterval) clearInterval(sessionData.heartbeatInterval);
             if (timerInterval) clearInterval(timerInterval);
             isExamActive = false;
-            document.getElementById('examIframe').src = "about:blank";
+            document.getElementById('examIframe').src = "about:blank"; 
             
+            let judulNotif = "Akses Ditolak";
+            let subJudulNotif = "Terjadi kendala pada sesi ujian Anda.";
+            let iconNotif = "fa-triangle-exclamation";
+            let pesanDariServer = res.message ? res.message.toLowerCase() : "";
+
+            // Deteksi pesan dari backend untuk menentukan notifikasi yang tepat
+            if (pesanDariServer.includes('perangkat lain') || pesanDariServer.includes('multi')) {
+                judulNotif = "Akses Ditolak";
+                subJudulNotif = "Akun terdeteksi aktif di perangkat lain.";
+                iconNotif = "fa-mobile-screen";
+            } 
+            else if (pesanDariServer.includes('tidak ditemukan') || pesanDariServer.includes('reset') || pesanDariServer.includes('tidak valid')) {
+                judulNotif = "Sesi Direset";
+                subJudulNotif = "Sesi ujian Anda telah direset oleh Admin/Proktor.";
+                iconNotif = "fa-user-shield";
+            }
+
+            // Tampilkan modal sesuai kategori
             showSecurityModal({
-                title: "Akses Ditolak",
-                subtitle: "Akun terdeteksi aktif di perangkat lain.",
-                message: res.message || "Sesi ujian dikunci demi keamanan sistem.",
-                icon: "fa-mobile-screen"
+                title: judulNotif,
+                subtitle: subJudulNotif,
+                message: res.message || "Sesi ujian ditutup oleh sistem.",
+                icon: iconNotif
             });
-            return;
+            return; // Berhenti di sini agar tidak memproses logic selanjutnya
         }
-        
+       
         if (res.kicked) {
             if (sessionData.heartbeatInterval) clearInterval(sessionData.heartbeatInterval);
             if (timerInterval) clearInterval(timerInterval);
