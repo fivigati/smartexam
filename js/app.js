@@ -346,12 +346,11 @@ async function kirimHeartbeat(payload) {
             });
            return; // Berhenti di sini agar tidak memproses logic selanjutnya
         }
-       if (res.exam_link && typeof currentExamLink !== 'undefined' && res.exam_link !== currentExamLink) {
-            currentExamLink = res.exam_link;
-            document.getElementById('examIframe').src = currentExamLink;
-            // Opsional: berikan notifikasi kecil (toast) agar siswa tahu link diperbarui
-            console.log("Link ujian diperbarui oleh Admin."); 
-        }
+       if (res.new_link && typeof currentExamLink !== 'undefined' && res.new_link !== currentExamLink) {
+          currentExamLink = res.new_link;
+          document.getElementById('examIframe').src = currentExamLink;
+          console.log("Link ujian diperbarui oleh Admin."); 
+       }
 
     } catch (err) {
         console.log('Heartbeat Error:', err);
