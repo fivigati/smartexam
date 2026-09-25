@@ -27,21 +27,34 @@ window.sessionData = {
 
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-// JEMBATAN PRODUCTION: MENEMBAK API GAS VIA HTTP FETCH MURNI (MENDUKUNG CORS REDIRECT)
-async function eksekusiGAS(payload) {
-    try {
-        const response = await fetch(CONFIG.SCRIPT_URL, {
-            method: "POST",
-            mode: "cors", 
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8" // Menggunakan text/plain mencegah preflight CORS error di GAS
-            },
-            body: JSON.stringify(payload)
-        });
-        return await response.json();
-    } catch (err) {
-        console.error("API Connection Error:", err);
-        throw new Error("Gagal berkomunikasi dengan server ujian.");
+// JEMBATAN PRODUCTION: DENGAN FITUR RETRY OTOMATIS (MENGATASI COLD START GAS)
+async function eksekusiGAS(payload, retries = 3, delay = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(CONFIG.SCRIPT_URL, {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (err) {
+            console.warn(`Percobaan ke-${i + 1} gagal:`, err);
+            if (i < retries - 1) {
+                // Tunggu beberapa detik sebelum mencoba lagi (mencegah server shock)
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+                console.error("API Connection Error Final:", err);
+                throw new Error("Gagal berkomunikasi dengan server ujian.");
+            }
+        }
     }
 }
 
